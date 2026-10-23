@@ -1,0 +1,35 @@
+name: Decompile Game BIN to OBJ
+
+on:
+  workflow_dispatch:
+    inputs:
+      bin_filename:
+        description: 'Type the exact name of the .bin file in the repo root (e.g. amy_h3.bin)'
+        required: true
+        default: 'amy_h3.bin'
+        type: string
+
+jobs:
+  convert_to_obj:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository Code
+        uses: actions/checkout@v4
+
+      - name: Set Up Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Run srm2obj Decompiler
+        run: |
+          # Dynamically extracts the base name and runs the reverse utility script
+          FILENAME="${{ inputs.bin_filename }}"
+          BASENAME="${FILENAME%.*}"
+          python3 charmodel-utils/srm2obj.py "$FILENAME" "${BASENAME}.obj"
+
+      - name: Upload Decompiled Text Asset
+        uses: actions/upload-artifact@v4
+        with:
+          name: decompiled-mesh-objects
+          path: "*.obj"
